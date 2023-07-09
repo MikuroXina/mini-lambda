@@ -84,3 +84,8 @@ const div1 = fix(
         },
 );
 export const div = (n: Nat) => div1(succ(n));
+
+export const divZeroStop =
+    (n: Nat) =>
+    (m: Nat): Nat =>
+        ifThenElse(isZero(m))(zero)(div(n)(m));
