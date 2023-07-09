@@ -1,6 +1,6 @@
 import { type Bool, FALSE, TRUE, ifThenElse, or } from "./bool.js";
 import { fix } from "./combinator.js";
-import { type Nat, add as addNat, divZeroStop, isZero, mul as mulNat, pred, zero } from "./nat.js";
+import { type Nat, divZeroStop, isZero, add as natAdd, mul as natMul, pred, zero } from "./nat.js";
 import { type Pair, first, newPair, second, swap } from "./pair.js";
 
 // x := [x, 0], -x := [0, x]
@@ -38,14 +38,14 @@ export const add: (x: Int) => (y: Int) => Int = mapOver(
     // = x1 - x2 + y1 - y2
     // = x1 + x2 - (y1 + y2)
     // = [x1 + x2, y1 + y2]
-    (x1) => (x2) => (y1) => (y2) => newPair(addNat(x1)(y1))(addNat(x2)(y2)),
+    (x1) => (x2) => (y1) => (y2) => newPair(natAdd(x1)(y1))(natAdd(x2)(y2)),
 );
 export const sub: (x: Int) => (y: Int) => Int = mapOver(
     // [x1, x2] - [y1, y2]
     // = x1 - x2 - (y1 - y2)
     // = x1 + y2 - (x2 + y1)
     // = [x1 + y2, x2 + y1]
-    (x1) => (x2) => (y1) => (y2) => newPair(addNat(x1)(y2))(addNat(x2)(y1)),
+    (x1) => (x2) => (y1) => (y2) => newPair(natAdd(x1)(y2))(natAdd(x2)(y1)),
 );
 
 export const mul: (x: Int) => (y: Int) => Int = mapOver(
@@ -55,7 +55,7 @@ export const mul: (x: Int) => (y: Int) => Int = mapOver(
     // = x1 y1 + x2 y2 - (x1 y2 + x2 y1)
     // = [x1 y1 + x2 y2, x1 y2 + x2 y1]
     (x1) => (x2) => (y1) => (y2) =>
-        newPair(addNat(mulNat(x1)(y1))(mulNat(x2)(y2)))(addNat(mulNat(x1)(y2))(mulNat(x2)(y1))),
+        newPair(natAdd(natMul(x1)(y1))(natMul(x2)(y2)))(natAdd(natMul(x1)(y2))(natMul(x2)(y1))),
 );
 
 export const div: (x: Int) => (y: Int) => Int = mapOver(
@@ -65,7 +65,7 @@ export const div: (x: Int) => (y: Int) => Int = mapOver(
     // = x1 / y1 + x2 / y2 - (x1 / y2 + x2 / y1)
     // = [x1 / y1 + x2 / y2, x1 / y2 + x2 / y1]
     (x1) => (x2) => (y1) => (y2) =>
-        newPair(addNat(divZeroStop(x1)(y1))(divZeroStop(x2)(y2)))(
-            addNat(divZeroStop(x1)(y2))(divZeroStop(x2)(y1)),
+        newPair(natAdd(divZeroStop(x1)(y1))(divZeroStop(x2)(y2)))(
+            natAdd(divZeroStop(x1)(y2))(divZeroStop(x2)(y1)),
         ),
 );
