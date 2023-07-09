@@ -21,10 +21,9 @@ export const evaluate =
         nat(actualSucc)(actualZero);
 export const toNumber = evaluate((x: number) => x + 1)(0);
 
-export const zero: Nat =
-    <T>(_internalSucc: (value: T) => T) =>
+export const zero = (<T>(_internalSucc: (value: T) => T) =>
     (internalZero: T) =>
-        internalZero;
+        internalZero) satisfies Nat;
 export const isZero = (n: Nat): Bool => n<Bool>((_x) => FALSE)(TRUE);
 
 export const succ =
