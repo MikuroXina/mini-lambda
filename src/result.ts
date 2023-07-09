@@ -90,3 +90,8 @@ export const unwrapOrElse =
     <T>(init: () => T) =>
     <E>(res: Result<E, T>): T =>
         res(init)((value) => value);
+
+export const resOptToOptRes = <E, T>(resOpt: Result<E, Option<T>>): Option<Result<E, T>> =>
+    resOpt((error) => some(err<E, T>(error)))((opt) =>
+        opt(none<Result<E, T>>)((value) => some(ok(value))),
+    );
