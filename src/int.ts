@@ -1,6 +1,14 @@
-import { type Bool, FALSE, TRUE, ifThenElse, or } from "./bool.js";
+import { type Bool, FALSE, TRUE, and, ifThenElse, not, or } from "./bool.js";
 import { fix } from "./combinator.js";
-import { type Nat, divZeroStop, isZero, add as natAdd, mul as natMul, pred, zero } from "./nat.js";
+import {
+    type Nat,
+    divZeroStop,
+    add as natAdd,
+    isZero as natIsZero,
+    mul as natMul,
+    pred,
+    zero,
+} from "./nat.js";
 import { type Pair, first, newPair, second, swap } from "./pair.js";
 
 // x := [x, 0], -x := [0, x]
@@ -11,18 +19,21 @@ export const fromSignAndNat =
     (n: Nat): Int =>
         ifThenElse(isPositive)(newPair(n)(zero))(newPair(zero)(n));
 export const intoSignAndNat = (i: Int): Pair<Bool, Nat> =>
-    ifThenElse(isZero(second(i)))(newPair(TRUE)(first(i)))(newPair(FALSE)(second(i)));
+    ifThenElse(natIsZero(second(i)))(newPair(TRUE)(first(i)))(newPair(FALSE)(second(i)));
 
 export const fromNat = (x: Nat) => newPair(x)(zero);
 
-export const abs = (i: Int): Nat => ifThenElse(isZero(first(i)))(first(i))(second(i));
+export const isPositive = (i: Int): Bool => and(natIsZero(second(i)))(not(natIsZero(first(i))));
+export const isNegative = (i: Int): Bool => and(natIsZero(first(i)))(not(natIsZero(second(i))));
+export const isZero = (i: Int): Bool => and(natIsZero(first(i)))(natIsZero(second(i)));
+export const abs = (i: Int): Nat => ifThenElse(natIsZero(first(i)))(first(i))(second(i));
 
 export const neg: (x: Int) => Int = swap;
 
 export const normalize = fix(
     (self: (x: Int) => Int) =>
         (x: Int): Int =>
-            ifThenElse(or(isZero(first(x)))(isZero(second(x))))(x)(
+            ifThenElse(or(natIsZero(first(x)))(natIsZero(second(x))))(x)(
                 self(newPair(pred(first(x)))(pred(second(x)))),
             ),
 );
