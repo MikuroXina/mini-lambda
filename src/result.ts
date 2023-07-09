@@ -1,5 +1,6 @@
 import { type Bool, FALSE, TRUE } from "./bool.js";
 import { type Option, none, some } from "./option.js";
+import { type Pair, newPair } from "./pair.js";
 
 // () + T
 // ===  ((() + T) => I) => I
@@ -74,3 +75,8 @@ export const mapErr =
     <E, F>(fn: (e: E) => F) =>
     <T>(res: Result<E, T>): Result<F, T> =>
         res((error) => err<F, T>(fn(error)))(ok);
+
+export const product =
+    <E, A>(resA: Result<E, A>) =>
+    <B>(resB: Result<E, B>): Result<E, Pair<A, B>> =>
+        resA(err<E, Pair<A, B>>)((a) => resB(err<E, Pair<A, B>>)((b) => ok(newPair(a)(b))));
