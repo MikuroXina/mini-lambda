@@ -80,3 +80,13 @@ export const product =
     <E, A>(resA: Result<E, A>) =>
     <B>(resB: Result<E, B>): Result<E, Pair<A, B>> =>
         resA(err<E, Pair<A, B>>)((a) => resB(err<E, Pair<A, B>>)((b) => ok(newPair(a)(b))));
+
+export const unwrapOr =
+    <T>(init: T) =>
+    <E>(res: Result<E, T>): T =>
+        res(() => init)((value) => value);
+
+export const unwrapOrElse =
+    <T>(init: () => T) =>
+    <E>(res: Result<E, T>): T =>
+        res(init)((value) => value);
