@@ -73,7 +73,7 @@ export const sub =
     (m: Nat): Nat =>
         n(pred)(m);
 
-const divide1 = fix(
+const div1 = fix(
     (self: (n: Nat) => (m: Nat) => Nat) =>
         (n: Nat) =>
         (m: Nat): Nat =>
@@ -83,4 +83,4 @@ const divide1 = fix(
             return ifThenElse(isZero(diff))(zero(f)(x))(f(self(diff)(m)(f)(x)));
         },
 );
-export const divide = (n: Nat) => divide1(succ(n));
+export const div = (n: Nat) => div1(succ(n));
