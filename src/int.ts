@@ -8,6 +8,8 @@ export type Int = Pair<Nat, typeof zero> | Pair<typeof zero, Nat>;
 
 export const fromNat = (x: Nat) => newPair(x)(zero);
 
+export const abs = (i: Int): Nat => ifThenElse(isZero(first(i)))(first(i))(second(i));
+
 export const neg: (x: Int) => Int = swap;
 
 export const normalize = fix(
