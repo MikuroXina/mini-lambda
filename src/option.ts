@@ -32,3 +32,6 @@ export const intoList =
     (onNil) =>
     (onCons) =>
         opt(onNil)((value) => onCons(value)(nil()));
+
+export const flatten = <T>(optOpt: Option<Option<T>>): Option<T> =>
+    optOpt(none<T>())((value) => value);
