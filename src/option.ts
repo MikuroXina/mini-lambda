@@ -114,3 +114,13 @@ export const optResToResOpt = <E, T>(optRes: Option<Result<E, T>>): Result<E, Op
     optRes(() => ok<E, Option<T>>(none<T>()))((res) =>
         res((error) => err<E, Option<T>>(error))((value) => ok<E, Option<T>>(some<T>(value))),
     );
+
+export const okOr =
+    <E>(error: E) =>
+    <T>(opt: Option<T>): Result<E, T> =>
+        opt(() => err<E, T>(error))(ok);
+
+export const okOrElse =
+    <E>(error: () => E) =>
+    <T>(opt: Option<T>): Result<E, T> =>
+        opt(() => err<E, T>(error()))(ok);
