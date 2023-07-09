@@ -49,7 +49,7 @@ export const mul: (x: Int) => (y: Int) => Int = mapOver(
         newPair(addNat(mulNat(x1)(y1))(mulNat(x2)(y2)))(addNat(mulNat(x1)(y2))(mulNat(x2)(y1))),
 );
 
-export const duv: (x: Int) => (y: Int) => Int = mapOver(
+export const div: (x: Int) => (y: Int) => Int = mapOver(
     // [x1, x2] / [y1, y2]
     // = (x1 - x2) / (y1 - y2)
     // = x1 / y1 - x1 / y2 - x2 / y1 + x2 / y2
