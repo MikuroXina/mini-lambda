@@ -1,4 +1,5 @@
 import { type Bool, FALSE, TRUE } from "./bool.js";
+import { type Option, none, some } from "./option.js";
 
 // () + T
 // ===  ((() + T) => I) => I
@@ -48,3 +49,28 @@ export const orElse =
     <E, F, T>(resB: (error: E) => Result<F, T>) =>
     (resA: Result<E, T>): Result<F, T> =>
         resA(resB)((value) => ok(value));
+
+export const optionOk = <E, T>(res: Result<E, T>): Option<T> => res(none<T>)(some);
+export const optionErr = <E, T>(res: Result<E, T>): Option<E> => res(some)(none);
+
+export const map =
+    <T, U>(fn: (t: T) => U) =>
+    <E>(res: Result<E, T>): Result<E, U> =>
+        res(err<E, U>)((value) => ok(fn(value)));
+
+export const mapOr =
+    <U>(init: U) =>
+    <T>(fn: (t: T) => U) =>
+    <E>(res: Result<E, T>): U =>
+        res(() => init)((value) => fn(value));
+
+export const mapOrElse =
+    <E, U>(fallback: (err: E) => U) =>
+    <T>(fn: (t: T) => U) =>
+    (res: Result<E, T>): U =>
+        res(fallback)((value) => fn(value));
+
+export const mapErr =
+    <E, F>(fn: (e: E) => F) =>
+    <T>(res: Result<E, T>): Result<F, T> =>
+        res((error) => err<F, T>(fn(error)))(ok);
