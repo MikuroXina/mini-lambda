@@ -1,10 +1,17 @@
-import { ifThenElse, or } from "./bool.js";
+import { type Bool, FALSE, TRUE, ifThenElse, or } from "./bool.js";
 import { fix } from "./combinator.js";
 import { type Nat, add as addNat, divZeroStop, isZero, mul as mulNat, pred, zero } from "./nat.js";
 import { type Pair, first, newPair, second, swap } from "./pair.js";
 
 // x := [x, 0], -x := [0, x]
 export type Int = Pair<Nat, typeof zero> | Pair<typeof zero, Nat>;
+
+export const fromSignAndNat =
+    (isPositive: Bool) =>
+    (n: Nat): Int =>
+        ifThenElse(isPositive)(newPair(n)(zero))(newPair(zero)(n));
+export const intoSignAndNat = (i: Int): Pair<Bool, Nat> =>
+    ifThenElse(isZero(second(i)))(newPair(TRUE)(first(i)))(newPair(FALSE)(second(i)));
 
 export const fromNat = (x: Nat) => newPair(x)(zero);
 
