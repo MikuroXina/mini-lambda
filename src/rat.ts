@@ -7,14 +7,24 @@ import {
     fromNat as intFromNat,
     mul as intMul,
     sub as intSub,
+    toNumber as intToNumber,
     intoSignAndNat,
     isNegative,
 } from "./int.js";
-import { type Nat, gcd, div as natDiv, mul as natMul, one } from "./nat.js";
+import {
+    type Nat,
+    gcd,
+    div as natDiv,
+    mul as natMul,
+    toNumber as natToNumber,
+    one,
+} from "./nat.js";
 import { type Pair, first, newPair, second } from "./pair.js";
 
-// `[Int, Nat]`, but also already reduced
+// num / denom := `[num: Int, denom: Nat]`, but also already reduced
 export type Rat = Pair<Int, Nat>;
+
+export const toNumber = (r: Rat): number => intToNumber(numerator(r)) / natToNumber(denominator(r));
 
 export const fromInt = (i: Int): Rat => newPair(i)(one);
 export const fromNat = (n: Nat): Rat => fromInt(intFromNat(n));

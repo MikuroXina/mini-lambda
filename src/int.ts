@@ -6,6 +6,7 @@ import {
     add as natAdd,
     isZero as natIsZero,
     mul as natMul,
+    toNumber as natToNumber,
     pred,
     zero,
 } from "./nat.js";
@@ -13,6 +14,9 @@ import { type Pair, first, newPair, second, swap } from "./pair.js";
 
 // x := [x, 0], -x := [0, x]
 export type Int = Pair<Nat, typeof zero> | Pair<typeof zero, Nat>;
+
+export const toNumber = (i: Int): number =>
+    isNegative(i)(-natToNumber(abs(i)))(natToNumber(abs(i)));
 
 export const fromSignAndNat =
     (isPositive: Bool) =>
