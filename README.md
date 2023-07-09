@@ -1,3 +1,3 @@
 # mini-lambda
 
-The minimal lambda calculous library.
+The minimal lambda calculus library.
