@@ -4,6 +4,7 @@
 // ===  (() => I) => (T => I) => I
 import { type Bool, FALSE, TRUE, and as boolAnd, ifThenElse } from "./bool.js";
 import { type List, nil } from "./list.js";
+import { type Pair, first, newPair, second } from "./pair.js";
 
 // ===  I => (T => I) => I
 export type Option<T> = <I>(onNone: I) => (onSome: (value: T) => I) => I;
@@ -60,3 +61,22 @@ export const xor =
         ifThenElse(boolAnd(isSome(optA))(isNone(optB)))(optA)(
             ifThenElse(boolAnd(isNone(optA))(isSome(optB)))(optB)(none()),
         );
+
+export const filter =
+    <T>(pred: (t: T) => Bool) =>
+    (opt: Option<T>): Option<T> =>
+        ifThenElse(opt(FALSE)(pred))(opt)(none());
+
+export const zip =
+    <A>(optA: Option<A>) =>
+    <B>(optB: Option<B>): Option<Pair<A, B>> =>
+        optA(none<Pair<A, B>>())((a) => optB(none<Pair<A, B>>())((b) => some(newPair(a)(b))));
+
+export const unzip = <A, B>(optA: Option<Pair<A, B>>): Pair<Option<A>, Option<B>> =>
+    optA(newPair(none<A>())(none<B>()))((pair) => newPair(some(first(pair)))(some(second(pair))));
+
+export const zipWith =
+    <A, B, X>(fn: (a: A) => (b: B) => X) =>
+    (optA: Option<A>) =>
+    (optB: Option<B>): Option<X> =>
+        optA(none<X>())((a) => optB(none<X>())((b) => some(fn(a)(b))));
