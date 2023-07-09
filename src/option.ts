@@ -81,3 +81,30 @@ export const zipWith =
     (optA: Option<A>) =>
     (optB: Option<B>): Option<X> =>
         optA(none<X>)((a) => optB(none<X>)((b) => some(fn(a)(b))));
+
+export const unwrapOr =
+    <T>(init: T) =>
+    (opt: Option<T>): T =>
+        opt(() => init)((v) => v);
+
+export const unwrapOrElse =
+    <T>(init: () => T) =>
+    (opt: Option<T>): T =>
+        opt(init)((v) => v);
+
+export const map =
+    <T, U>(fn: (t: T) => U) =>
+    (opt: Option<T>): Option<U> =>
+        opt(none<U>)((v) => some(fn(v)));
+
+export const mapOr =
+    <U>(init: U) =>
+    <T>(fn: (t: T) => U) =>
+    (opt: Option<T>): U =>
+        opt(() => init)(fn);
+
+export const mapOrElse =
+    <U>(init: () => U) =>
+    <T>(fn: (t: T) => U) =>
+    (opt: Option<T>): U =>
+        opt(init)(fn);
