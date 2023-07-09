@@ -98,3 +98,11 @@ export const rem =
     (n: Nat) =>
     (m: Nat): Nat =>
         remExceptZero(add(n)(m))(m);
+
+export const gcd = fix(
+    (self: (n: Nat) => (m: Nat) => Nat) =>
+        (n: Nat) =>
+        (m: Nat): Nat =>
+            ifThenElse(isZero(m))(n)(self(m)(rem(n)(m))),
+);
+export const lcm = (n: Nat) => (m: Nat) => div(mul(n)(m))(gcd(n)(m));
