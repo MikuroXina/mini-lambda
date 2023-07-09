@@ -89,3 +89,12 @@ export const divZeroStop =
     (n: Nat) =>
     (m: Nat): Nat =>
         ifThenElse(isZero(m))(zero)(div(n)(m));
+
+const remExceptZero = fix((self: (n: Nat) => (m: Nat) => Nat) => (n: Nat) => (m: Nat): Nat => {
+    const diff = sub(n)(m);
+    return ifThenElse(isZero(diff))(n)(self(diff)(m));
+});
+export const rem =
+    (n: Nat) =>
+    (m: Nat): Nat =>
+        remExceptZero(add(n)(m))(m);
