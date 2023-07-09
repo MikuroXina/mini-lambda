@@ -2,7 +2,7 @@
 // ===  ((() + T) => I) => I
 // ===  ((() => I) × (T => I)) => I
 // ===  (() => I) => (T => I) => I
-import { type Bool, FALSE, TRUE, ifThenElse } from "./bool.js";
+import { type Bool, FALSE, TRUE, and as boolAnd, ifThenElse } from "./bool.js";
 import { type List, nil } from "./list.js";
 
 // ===  I => (T => I) => I
@@ -35,3 +35,28 @@ export const intoList =
 
 export const flatten = <T>(optOpt: Option<Option<T>>): Option<T> =>
     optOpt(none<T>())((value) => value);
+
+export const and =
+    <B>(optB: Option<B>) =>
+    <A>(optA: Option<A>): Option<B> =>
+        optA(none<B>())(() => optB);
+export const andThen =
+    <A, B>(optB: (a: A) => Option<B>) =>
+    (optA: Option<A>): Option<B> =>
+        optA(none<B>())(optB);
+
+export const or =
+    <T>(optB: Option<T>) =>
+    (optA: Option<T>): Option<T> =>
+        optA(optA)(() => optB);
+export const orElse =
+    <T>(optB: () => Option<T>) =>
+    (optA: Option<T>): Option<T> =>
+        optA(optA)(optB);
+
+export const xor =
+    <T>(optB: Option<T>) =>
+    (optA: Option<T>): Option<T> =>
+        ifThenElse(boolAnd(isSome(optA))(isNone(optB)))(optA)(
+            ifThenElse(boolAnd(isNone(optA))(isSome(optB)))(optB)(none()),
+        );
