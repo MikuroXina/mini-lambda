@@ -30,3 +30,21 @@ export const flatten = <E, T>(resRes: Result<E, Result<E, T>>): Result<E, T> =>
     resRes(err<E, T>)((value) => value);
 
 export const mergeOkErr = <T>(res: Result<T, T>): T => res((x) => x)((x) => x);
+
+export const and =
+    <E, B>(resB: Result<E, B>) =>
+    <A>(resA: Result<E, A>): Result<E, B> =>
+        resA(err<E, B>)(() => resB);
+export const andThen =
+    <E, A, B>(resB: (a: A) => Result<E, B>) =>
+    (resA: Result<E, A>): Result<E, B> =>
+        resA(err<E, B>)(resB);
+
+export const or =
+    <E, T>(resB: Result<E, T>) =>
+    (resA: Result<E, T>): Result<E, T> =>
+        resA(() => resB)(() => resA);
+export const orElse =
+    <E, F, T>(resB: (error: E) => Result<F, T>) =>
+    (resA: Result<E, T>): Result<F, T> =>
+        resA(resB)((value) => ok(value));
