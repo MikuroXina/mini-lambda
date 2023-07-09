@@ -1,6 +1,7 @@
 import { type Bool, FALSE, TRUE, and as boolAnd, ifThenElse } from "./bool.js";
 import { type List, nil } from "./list.js";
 import { type Pair, first, newPair, second } from "./pair.js";
+import { type Result, err, ok } from "./result.js";
 
 // () + T
 // ===  ((() + T) => I) => I
@@ -108,3 +109,8 @@ export const mapOrElse =
     <T>(fn: (t: T) => U) =>
     (opt: Option<T>): U =>
         opt(init)(fn);
+
+export const optResToResOpt = <E, T>(optRes: Option<Result<E, T>>): Result<E, Option<T>> =>
+    optRes(() => ok<E, Option<T>>(none<T>()))((res) =>
+        res((error) => err<E, Option<T>>(error))((value) => ok<E, Option<T>>(some<T>(value))),
+    );
