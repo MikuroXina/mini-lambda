@@ -7,7 +7,7 @@ export const fromNumber = (n: number): Nat => {
     if (!Number.isInteger(n) || n < 0) {
         throw new Error(`failed to convert from: ${n}`);
     }
-    let nat = zero;
+    let nat: Nat = zero;
     for (; 0 < n; --n) {
         nat = succ(nat);
     }
@@ -21,10 +21,10 @@ export const evaluate =
         nat(actualSucc)(actualZero);
 export const toNumber = evaluate((x: number) => x + 1)(0);
 
-export const zero = (<T>(_internalSucc: (value: T) => T) =>
+export const zero = (<T>() =>
     (internalZero: T) =>
         internalZero) satisfies Nat;
-export const isZero = (n: Nat): Bool => n<Bool>((_x) => FALSE)(TRUE);
+export const isZero = (n: Nat): Bool => n<Bool>(() => FALSE)(TRUE);
 
 export const succ =
     (n: Nat): Nat =>
@@ -77,10 +77,10 @@ const div1 = fix(
     (self: (n: Nat) => (m: Nat) => Nat) =>
         (n: Nat) =>
         (m: Nat): Nat =>
-        (f) =>
-        (x) => {
+        <T>(f: (value: T) => T) =>
+        (x: T) => {
             const diff = sub(n)(m);
-            return ifThenElse(isZero(diff))(zero(f)(x))(f(self(diff)(m)(f)(x)));
+            return ifThenElse(isZero(diff))(zero<T>()(x))(f(self(diff)(m)(f)(x)));
         },
 );
 export const div = (n: Nat) => div1(succ(n));

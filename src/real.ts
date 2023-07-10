@@ -16,7 +16,7 @@ import {
 export type Real = (index: Nat) => Rat;
 
 export const toNumber = (r: Real): number => {
-    let step = zero;
+    let step: Nat = zero;
     while (true) {
         const left = ratToNumber(ratDiv(ratSub(r(step))(ratFromNat(one)))(ratFromNat(step)));
         const right = ratToNumber(ratDiv(ratAdd(r(step))(ratFromNat(one)))(ratFromNat(step)));

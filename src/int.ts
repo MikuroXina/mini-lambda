@@ -32,18 +32,23 @@ export const isNegative = (i: Int): Bool => and(natIsZero(first(i)))(not(natIsZe
 export const isZero = (i: Int): Bool => and(natIsZero(first(i)))(natIsZero(second(i)));
 export const abs = (i: Int): Nat => ifThenElse(natIsZero(first(i)))(first(i))(second(i));
 
-export const neg: (x: Int) => Int = swap;
+export type Neg<I extends Int> = I extends Pair<infer N, typeof zero>
+    ? Pair<typeof zero, N>
+    : Pair<Nat, typeof zero>;
+export const neg: <I extends Int>(i: I) => Neg<I> = swap as unknown as <I extends Int>(
+    i: I,
+) => Neg<I>;
 
 export const normalize = fix(
-    (self: (x: Int) => Int) =>
-        (x: Int): Int =>
-            ifThenElse(or(natIsZero(first(x)))(natIsZero(second(x))))(x)(
+    (self: (x: Int | Pair<Nat, Nat>) => Int) =>
+        (x: Int | Pair<Nat, Nat>): Int =>
+            ifThenElse(or(natIsZero(first(x)))(natIsZero(second(x))))(x as unknown as Int)(
                 self(newPair(pred(first(x)))(pred(second(x)))),
             ),
 );
 
 const mapOver =
-    (fn: (x1: Nat) => (x2: Nat) => (y1: Nat) => (y2: Nat) => Int) =>
+    (fn: (x1: Nat) => (x2: Nat) => (y1: Nat) => (y2: Nat) => Pair<Nat, Nat>) =>
     (x: Int) =>
     (y: Int): Int =>
         normalize(fn(first(x))(second(x))(first(y))(second(y)));
