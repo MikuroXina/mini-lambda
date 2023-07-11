@@ -1,4 +1,4 @@
-import { type Bool, FALSE, TRUE, ifThenElse } from "./bool.js";
+import { type Bool, FALSE, TRUE, and, ifThenElse, not } from "./bool.js";
 import { fix } from "./combinator.js";
 
 export type Nat = <T>(internalSucc: (value: T) => T) => (internalZero: T) => T;
@@ -21,10 +21,12 @@ export const evaluate =
         nat(actualSucc)(actualZero);
 export const toNumber = evaluate((x: number) => x + 1)(0);
 
-export const zero = (<T>() =>
+export const zero: Nat =
+    <T>() =>
     (internalZero: T) =>
-        internalZero) satisfies Nat;
+        internalZero;
 export const isZero = (n: Nat): Bool => n<Bool>(() => FALSE)(TRUE);
+export const nonZero = (n: Nat) => not(isZero(n));
 
 export const succ =
     (n: Nat): Nat =>
@@ -80,7 +82,7 @@ const div1 = fix(
         <T>(f: (value: T) => T) =>
         (x: T) => {
             const diff = sub(n)(m);
-            return ifThenElse(isZero(diff))(zero<T>()(x))(f(self(diff)(m)(f)(x)));
+            return ifThenElse(isZero(diff))(zero(f)(x))(f(self(diff)(m)(f)(x)));
         },
 );
 export const div = (n: Nat) => div1(succ(n));
@@ -106,3 +108,30 @@ export const gcd = fix(
             ifThenElse(isZero(m))(n)(self(m)(rem(n)(m))),
 );
 export const lcm = (n: Nat) => (m: Nat) => div(mul(n)(m))(gcd(n)(m));
+
+export const lessThan =
+    (m: Nat) =>
+    (n: Nat): Bool =>
+        // m < n  ===  m - n < 0  ===  m - n + 1 <= 0
+        isZero(sub(succ(m))(n));
+
+export const greaterThan =
+    (m: Nat) =>
+    (n: Nat): Bool =>
+        lessThan(n)(m);
+
+export const lessThanOrEqualTo =
+    (m: Nat) =>
+    (n: Nat): Bool =>
+        // m <= n  ===  m - n <= 0
+        isZero(sub(m)(n));
+
+export const greaterThanOrEqualTo =
+    (m: Nat) =>
+    (n: Nat): Bool =>
+        lessThanOrEqualTo(n)(m);
+
+export const equalTo =
+    (m: Nat) =>
+    (n: Nat): Bool =>
+        and(lessThanOrEqualTo(m)(n))(greaterThanOrEqualTo(m)(n));
