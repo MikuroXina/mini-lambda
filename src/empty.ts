@@ -1,4 +1,4 @@
-export type Empty = <I>() => I;
-export const empty: Empty = () => {
+export type Empty = () => never;
+export const empty: Empty = (): never => {
     throw new Error("must not evaluate empty");
 };
