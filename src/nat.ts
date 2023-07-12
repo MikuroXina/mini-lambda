@@ -1,105 +1,109 @@
-import { type Bool, FALSE, TRUE, and, ifThenElse, not } from "./bool.js";
+import { type Bool, FALSE, TRUE, ifThenElse, not, or } from "./bool.js";
 import { fix } from "./combinator.js";
+import { empty } from "./empty.js";
 
-export type Nat = <T>(internalSucc: (value: T) => T) => (internalZero: T) => T;
+// Nat := zero | succ (n)
+// = (zero: () => I) + (succ: (n: Nat) => I)
+// = ( (zero: () => I) + (succ: (n: Nat) => I) ) => I
+// = (zero: () => I) × ( (succ: (n: Nat) => I) => I)
+// = (zero: () => I) => (succ: (n: Nat) => I) => I
+export type Nat = <I>(onSucc: (predN: Nat) => I) => (zero: () => I) => I;
 
 export const fromNumber = (n: number): Nat => {
     if (!Number.isInteger(n) || n < 0) {
         throw new Error(`failed to convert from: ${n}`);
     }
     let nat: Nat = zero;
-    for (; 0 < n; --n) {
-        nat = succ(nat);
+    for (; 0 < n; n /= 2) {
+        if (n % 2 == 1) {
+            nat = succ(nat);
+        }
+        nat = pow(nat)(two);
     }
     return nat;
 };
 
 export const evaluate =
-    <T>(actualSucc: (value: T) => T) =>
-    (actualZero: T) =>
-    (nat: Nat): T =>
-        nat(actualSucc)(actualZero);
-export const toNumber = evaluate((x: number) => x + 1)(0);
+    <I>(actualSucc: (value: I) => I) =>
+    (actualZero: () => I) =>
+    (nat: Nat): I =>
+        nat<I>((n) => evaluate(actualSucc)(actualZero)(n))(actualZero);
+export const toNumber = evaluate((x: number) => x + 1)(() => 0);
 
 export const zero: Nat =
-    <T>() =>
-    (internalZero: T) =>
-        internalZero;
-export const isZero = (n: Nat): Bool => n<Bool>(() => FALSE)(TRUE);
+    <I>() =>
+    (internalZero: () => I) =>
+        internalZero();
+export const isZero = (n: Nat): Bool => n(() => FALSE)(() => TRUE);
 export const nonZero = (n: Nat) => not(isZero(n));
 
 export const succ =
     (n: Nat): Nat =>
-    <T>(f: (value: T) => T) =>
-    (x: T) =>
-        f(n(f)(x));
+    <T>(f: (s: Nat) => T) =>
+    () =>
+        f(n);
 
 export const one: Nat = succ(zero);
+export const two: Nat = succ(one);
 
-export const pred =
-    (n: Nat): Nat =>
-    <T>(f: (value: T) => T) =>
-    (x: T) => {
-        type Value<X> = (fn: (x: X) => X) => X;
-        const value =
-            <X>(v: X): Value<X> =>
-            (h) =>
-                h(v);
-        const extract = <X>(k: Value<X>): X => k((u: X) => u);
-        const include = (g: Value<T>): Value<T> => value(g(f));
-        const constant = () => x;
-        return extract(n(include)(constant));
-    };
+export const pred = (n: Nat): Nat => n((predN) => predN)(() => zero);
 
-export const recurse =
-    <A>(op: (a: A) => A) =>
-    (init: A) =>
-    (times: Nat): A =>
-        times(op)(init);
 export const add =
     (n: Nat) =>
     (m: Nat): Nat =>
-        recurse(succ)(n)(m);
+        // (succ n) + m = succ (n + m)
+        // 0 + m = m
+        n((predN) => succ(add(predN)(m)))(() => m);
 export const mul =
     (n: Nat) =>
     (m: Nat): Nat =>
-    <T>(f: (value: T) => T) =>
-        n(m(f));
+        // (succ n) * m = m + n * m
+        // 0 * m = 0
+        n((predN) => add(m)(mul(predN)(m)))(() => zero);
 export const pow =
     (n: Nat) =>
     (m: Nat): Nat =>
-        n(m);
+        // n ^ (succ m) = n ^ m * n
+        // n ^ 0 = 1
+        m((predM) => mul(pow(n)(predM))(n))(() => one);
 
 export const sub =
     (n: Nat) =>
     (m: Nat): Nat =>
-        n(pred)(m);
+        // n - 0 = n
+        // 0 - succ m = 0
+        // succ n - succ m = n - m
+        m((predM) => n((predN) => sub(predN)(predM))(() => zero))(() => n);
 
-const div1 = fix(
-    (self: (n: Nat) => (m: Nat) => Nat) =>
-        (n: Nat) =>
-        (m: Nat): Nat =>
-        <T>(f: (value: T) => T) =>
-        (x: T) => {
-            const diff = sub(n)(m);
-            return ifThenElse(isZero(diff))(zero(f)(x))(f(self(diff)(m)(f)(x)));
-        },
-);
-export const div = (n: Nat) => div1(succ(n));
-
-export const divZeroStop =
+const div1 =
+    (quotient: Nat) =>
+    (n: Nat) =>
+    (m: Nat) =>
+    (count: Nat): Nat =>
+        n((predN) =>
+            count((predCount) => div1(quotient)(predN)(m)(predCount))(() =>
+                div1(succ(quotient))(predN)(m)(m),
+            ),
+        )(() => quotient);
+export const div =
     (n: Nat) =>
     (m: Nat): Nat =>
-        ifThenElse(isZero(m))(zero)(div(n)(m));
+        m((predM) => div1(zero)(n)(predM)(predM))(empty);
 
-const remExceptZero = fix((self: (n: Nat) => (m: Nat) => Nat) => (n: Nat) => (m: Nat): Nat => {
-    const diff = sub(n)(m);
-    return ifThenElse(isZero(diff))(n)(self(diff)(m));
-});
+const rem1 =
+    (remainder: Nat) =>
+    (n: Nat) =>
+    (m: Nat) =>
+    (count: Nat): Nat =>
+        n((predN) =>
+            count((predCount) => rem1(succ(remainder))(predN)(m)(predCount))(() =>
+                rem1(zero)(predN)(m)(m),
+            ),
+        )(() => remainder);
 export const rem =
     (n: Nat) =>
     (m: Nat): Nat =>
-        remExceptZero(add(n)(m))(m);
+        m((predM) => rem1(zero)(n)(predM)(predM))(empty);
 
 export const gcd = fix(
     (self: (n: Nat) => (m: Nat) => Nat) =>
@@ -110,28 +114,34 @@ export const gcd = fix(
 export const lcm = (n: Nat) => (m: Nat) => div(mul(n)(m))(gcd(n)(m));
 
 export const lessThan =
-    (m: Nat) =>
-    (n: Nat): Bool =>
-        // m < n  ===  m - n < 0  ===  m - n + 1 <= 0
-        isZero(sub(succ(m))(n));
+    (n: Nat) =>
+    (m: Nat): Bool =>
+        // n < 0 = FALSE
+        // 0 < succ m = TRUE
+        // succ n < succ m = n < m
+        m((predM) => n((predN) => lessThan(predN)(predM))(() => TRUE))(() => FALSE);
 
 export const greaterThan =
-    (m: Nat) =>
-    (n: Nat): Bool =>
-        lessThan(n)(m);
-
-export const lessThanOrEqualTo =
-    (m: Nat) =>
-    (n: Nat): Bool =>
-        // m <= n  ===  m - n <= 0
-        isZero(sub(m)(n));
-
-export const greaterThanOrEqualTo =
-    (m: Nat) =>
-    (n: Nat): Bool =>
-        lessThanOrEqualTo(n)(m);
+    (n: Nat) =>
+    (m: Nat): Bool =>
+        lessThan(m)(n);
 
 export const equalTo =
-    (m: Nat) =>
-    (n: Nat): Bool =>
-        and(lessThanOrEqualTo(m)(n))(greaterThanOrEqualTo(m)(n));
+    (n: Nat) =>
+    (m: Nat): Bool =>
+        // 0 == 0  =  TRUE
+        // succ n == succ m  =  n == m
+        // otherwise  =  FALSE
+        n((predM) => m((predN) => equalTo(predM)(predN))(() => FALSE))(() =>
+            m(() => FALSE)(() => TRUE),
+        );
+
+export const lessThanOrEqualTo =
+    (n: Nat) =>
+    (m: Nat): Bool =>
+        or(lessThan(n)(m))(equalTo(n)(m));
+
+export const greaterThanOrEqualTo =
+    (n: Nat) =>
+    (m: Nat): Bool =>
+        or(greaterThan(n)(m))(equalTo(n)(m));
