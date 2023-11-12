@@ -29,10 +29,6 @@ export const toNumber = (r: Rat): number => intToNumber(numerator(r)) / natToNum
 export const fromInt = (i: Int): Rat => newPair(i)(one);
 export const fromNat = (n: Nat): Rat => fromInt(intFromNat(n));
 
-export const fromNumAndDenom: (i: Int) => (n: Nat) => Rat = newPair;
-export const numerator: (r: Rat) => Int = first;
-export const denominator: (r: Rat) => Nat = second;
-
 export const fromTwoInts =
     (num: Int) =>
     (denom: Int): Rat => {
@@ -50,6 +46,10 @@ export const reduce = (r: Rat): Rat => {
         natDiv(second(r))(gcdOfTwo),
     );
 };
+
+export const fromNumAndDenom = (i: Int) => (n: Nat): Rat => reduce(newPair(i)(n));
+export const numerator: (r: Rat) => Int = first;
+export const denominator: (r: Rat) => Nat = second;
 
 const mapOver =
     (fn: (rNum: Int) => (rDen: Nat) => (sNum: Int) => (sDen: Nat) => Rat) =>
