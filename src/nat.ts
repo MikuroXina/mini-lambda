@@ -18,7 +18,7 @@ export const fromNumber = (n: number): Nat => {
         if (n % 2 == 1) {
             nat = succ(nat);
         }
-        nat = pow(nat)(two);
+        nat = mul(nat)(two);
     }
     return nat;
 };
