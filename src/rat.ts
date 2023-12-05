@@ -47,7 +47,10 @@ export const reduce = (r: Rat): Rat => {
     );
 };
 
-export const fromNumAndDenom = (i: Int) => (n: Nat): Rat => reduce(newPair(i)(n));
+export const fromNumAndDenom =
+    (i: Int) =>
+    (n: Nat): Rat =>
+        reduce(newPair(i)(n));
 export const numerator: (r: Rat) => Int = first;
 export const denominator: (r: Rat) => Nat = second;
 
