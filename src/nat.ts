@@ -15,10 +15,10 @@ export const fromNumber = (n: number): Nat => {
     }
     let nat: Nat = zero;
     for (; 0 < n; n /= 2) {
+        nat = mul(nat)(two);
         if (n % 2 == 1) {
             nat = succ(nat);
         }
-        nat = mul(nat)(two);
     }
     return nat;
 };
