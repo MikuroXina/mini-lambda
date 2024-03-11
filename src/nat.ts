@@ -30,30 +30,33 @@ export const evaluate =
         nat<I>((n) => evaluate(actualSucc)(actualZero)(n))(actualZero);
 export const toNumber = evaluate((x: number) => x + 1)(() => 0);
 
-export const zero: Nat =
-    <I>() =>
+export const zero = (<I>() =>
     (internalZero: () => I) =>
-        internalZero();
+        internalZero()) satisfies Nat;
+export type Zero = typeof zero;
 export const isZero = (n: Nat): Bool => n(() => FALSE)(() => TRUE);
 export const nonZero = (n: Nat) => not(isZero(n));
 
+export type Succ<N extends Nat> = <T>(f: (s: N) => T) => () => T;
 export const succ =
-    (n: Nat): Nat =>
-    <T>(f: (s: Nat) => T) =>
+    <N extends Nat>(n: N): Succ<N> =>
+    <T>(f: (s: N) => T) =>
     () =>
         f(n);
 
-export const one: Nat = succ(zero);
-export const two: Nat = succ(one);
+export const one = succ(zero) satisfies Nat;
+export const two = succ(one) satisfies Nat;
 
-export const pred = (n: Nat): Nat => n((predN) => predN)(() => zero);
+export type Pred<N extends Nat> = N extends Succ<infer M extends Nat> ? M : Zero;
+export const pred = <N extends Nat>(n: N): Pred<N> =>
+    n<Pred<N>>((predN) => predN as Pred<N>)(() => zero as Pred<N>);
 
 export const add =
     (n: Nat) =>
     (m: Nat): Nat =>
         // (succ n) + m = succ (n + m)
         // 0 + m = m
-        n((predN) => succ(add(predN)(m)))(() => m);
+        n<Nat>((predN) => succ(add(predN)(m)))(() => m);
 export const mul =
     (n: Nat) =>
     (m: Nat): Nat =>
