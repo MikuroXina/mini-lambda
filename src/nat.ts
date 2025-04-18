@@ -93,6 +93,11 @@ export const div =
     (m: Nat): Nat =>
         m((predM) => div1(zero)(n)(predM)(predM))(empty);
 
+export const divZeroStop =
+    (n: Nat) =>
+    (m: Nat): Nat =>
+        ifThenElse(isZero(m))<Nat>(zero)(div(n)(m));
+
 const rem1 =
     (remainder: Nat) =>
     (n: Nat) =>
