@@ -14,9 +14,9 @@ export const fromNumber = (n: number): Nat => {
         throw new Error(`failed to convert from: ${n}`);
     }
     let nat: Nat = zero;
-    for (; 0 < n; n /= 2) {
+    for (let i = 0; 0 < i; i /= 2) {
         nat = mul(nat)(two);
-        if (n % 2 == 1) {
+        if (i % 2 === 1) {
             nat = succ(nat);
         }
     }

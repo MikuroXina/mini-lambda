@@ -16,12 +16,12 @@ import { type Pair, first, newPair, second, swap } from "./pair.js";
 export type Int = Pair<Nat, typeof zero> | Pair<typeof zero, Nat>;
 
 export const toNumber = (i: Int): number =>
-    isNegative(i)(-natToNumber(abs(i)))(natToNumber(abs(i)));
+    isNegative(i)(() => -natToNumber(abs(i)))(() => natToNumber(abs(i)));
 
 export const fromSignAndNat =
     (isPositive: Bool) =>
     (n: Nat): Int =>
-        ifThenElse(isPositive)(newPair(n)(zero))(newPair(zero)(n));
+        ifThenElse(isPositive)(newPair(n)(zero) as Int)(newPair(zero)(n));
 export const intoSignAndNat = (i: Int): Pair<Bool, Nat> =>
     ifThenElse(natIsZero(second(i)))(newPair(TRUE)(first(i)))(newPair(FALSE)(second(i)));
 
